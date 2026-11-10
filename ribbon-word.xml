@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+  <ribbon>
+    <tabs>
+      <tab id="tabAlifbo" label="Alifbo" insertAfterMso="TabView">
+        <group id="grpConv" label="O'tkazish">
+          <button id="btnNew" label="Yangi alifbo" size="large" imageMso="TranslateDocument" onAction="RbWdNew" screentip="Yangi alifboga o'tkazish" supertip="Belgilangan matn yoki butun hujjat yangi alifboga o'tadi."/>
+          <button id="btnOld" label="Eski alifbo" size="large" imageMso="Undo" onAction="RbWdOld" screentip="Eski alifboga qaytarish" supertip="Yangi alifbodan eskisiga qaytaradi."/>
+          <button id="btnSplit" label="Varaqlarni bo'lish" size="large" imageMso="PageBreakInsert" onAction="RbWdSplit" screentip="Varaqlarni bo'lish" supertip="Hujjatni betlar bo'yicha alohida Word/PDF fayllarga ajratadi."/>
+        </group>
+        <group id="grpKrill" label="Kirill o'tkazish">
+          <button id="btnKrillNew" label="Krill &#x2192; Yangi" size="large" imageMso="ChangeCase" onAction="RbWdKrillNew" screentip="Kirill &#x2192; Yangi alifbo" supertip="Kirill (rus) alifbosidagi matnni yangi o&#x2BC;zbek alifbosiga (&#xF6;,&#x11F;,&#x15F;,&#xE7;) o&#x2BC;tkazadi."/>
+          <button id="btnKrillOld" label="Krill &#x2192; Lotin" size="large" imageMso="ReviewAcceptChange" onAction="RbWdKrillOld" screentip="Kirill &#x2192; Lotin alifbo" supertip="Kirill (rus) alifbosidagi matnni lotin alifbosiga (o&#x2BC;,g&#x2BC;,sh,ch) o&#x2BC;tkazadi."/>
+        </group>
+        <group id="grpTools" label="Sozlamalar va Fayllar">
+          <button id="btnExc" label="Istisnolar" size="normal" imageMso="SpellingAndGrammar" onAction="RbWdExc" screentip="Istisnolar ro'yxati" supertip="O'zgartirilmaydigan so'zlar ro'yxatini tahrirlash."/>
+          <button id="btnTools" label="Fayllar oynasi" size="large" imageMso="FileOpen" onAction="RbWdTools" screentip="Fayllarni o'tkazish" supertip="Word, Excel, PowerPoint fayllarini ommaviy o'tkazish oynasi."/>
+        </group>
+        <group id="grpInfo" label="Dastur">
+          <button id="btnLic" label="Litsenziya" size="large" imageMso="HappyFace" onAction="RbWdLic" screentip="Litsenziya" supertip="Kompyuter kodi va litsenziya kaliti."/>
+          <button id="btnAbout" label="Muallif" size="normal" imageMso="AdvancedFileProperties" onAction="RbWdAbout" screentip="Muallif" supertip="Fozliddinov Safarmurod, Telegram @Safar_master."/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

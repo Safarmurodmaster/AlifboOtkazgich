@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+  <ribbon>
+    <tabs>
+      <tab id="tabAlifbo" label="Alifbo" insertAfterMso="TabView">
+        <group id="grpConv" label="O'tkazish">
+          <button id="btnNew" label="Yangi alifbo" size="large" imageMso="TranslateDocument" onAction="RbPptNew" screentip="Yangi alifboga o'tkazish" supertip="Butun taqdimot (slaydlar, jadvallar, izohlar) yangi alifboga o'tadi."/>
+          <button id="btnOld" label="Eski alifbo" size="large" imageMso="Undo" onAction="RbPptOld" screentip="Eski alifboga qaytarish" supertip="Yangi alifbodan eskisiga qaytaradi."/>
+        </group>
+        <group id="grpKrill" label="Kirill o'tkazish">
+          <button id="btnKrillNew" label="Krill &#x2192; Yangi" size="large" imageMso="ChangeCase" onAction="RbPptKrillNew" screentip="Kirill &#x2192; Yangi alifbo" supertip="Kirill alifbosidagi matnni yangi o&#x2BC;zbek alifbosiga o&#x2BC;tkazadi."/>
+          <button id="btnKrillOld" label="Krill &#x2192; Lotin" size="large" imageMso="ReviewAcceptChange" onAction="RbPptKrillOld" screentip="Kirill &#x2192; Lotin alifbo" supertip="Kirill alifbosidagi matnni lotin alifbosiga o&#x2BC;tkazadi."/>
+        </group>
+        <group id="grpFiles" label="Fayllar">
+          <button id="btnTools" label="Fayllarni o'tkazish" size="large" imageMso="FileOpen" onAction="RbTools" screentip="Fayllarni o'tkazish" supertip="Word, Excel, PowerPoint va matn fayllarini bir yoki ko'p qilib yangi alifboga o'tkazadi."/>
+        </group>
+        <group id="grpInfo" label="Dastur">
+          <button id="btnLic" label="Litsenziya" size="large" imageMso="HappyFace" onAction="RbLic" screentip="Litsenziya" supertip="Sinov muddati va litsenziya kodi."/>
+          <button id="btnAbout" label="Muallif" size="large" imageMso="AdvancedFileProperties" onAction="RbAbout" screentip="Muallif" supertip="Fozliddinov Safarmurod, Telegram @Safar_master."/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>
