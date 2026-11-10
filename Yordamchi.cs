@@ -68,6 +68,7 @@ namespace AlifboYordamchi
         private const uint MOD_SHIFT = 0x0004;
 
         private const string SALT = "SAFAR_2026_";
+        private static readonly IntPtr MAGIC_EXTRA = (IntPtr)0x414C4642; // "ALFB" o'zimizning signallarimiz uchun
 
         #region Win32 API va Keyboard Hook
 
@@ -299,11 +300,13 @@ namespace AlifboYordamchi
                 inp[0].U.ki.wVk = 0;
                 inp[0].U.ki.wScan = (ushort)c;
                 inp[0].U.ki.dwFlags = KEYEVENTF_UNICODE;
+                inp[0].U.ki.dwExtraInfo = MAGIC_EXTRA;
 
                 inp[1].type = INPUT_KEYBOARD;
                 inp[1].U.ki.wVk = 0;
                 inp[1].U.ki.wScan = (ushort)c;
                 inp[1].U.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+                inp[1].U.ki.dwExtraInfo = MAGIC_EXTRA;
 
                 uint sent = SendInput(2, inp, Marshal.SizeOf(typeof(INPUT)));
                 if (sent == 0)
@@ -341,9 +344,9 @@ namespace AlifboYordamchi
 
                 if (anyShift)
                 {
-                    keybd_event(0xA0, 0x2A, KEYEVENTF_KEYUP, UIntPtr.Zero); // Left Shift UP
-                    keybd_event(0xA1, 0x36, KEYEVENTF_KEYUP, UIntPtr.Zero); // Right Shift UP
-                    keybd_event((byte)VK_SHIFT, 0x2A, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(0xA0, 0x2A, KEYEVENTF_KEYUP, (UIntPtr)0x414C4642); // Left Shift UP
+                    keybd_event(0xA1, 0x36, KEYEVENTF_KEYUP, (UIntPtr)0x414C4642); // Right Shift UP
+                    keybd_event((byte)VK_SHIFT, 0x2A, KEYEVENTF_KEYUP, (UIntPtr)0x414C4642);
                 }
 
                 // 2. Oldingi harfni o'chirish (Backspace)
@@ -353,18 +356,20 @@ namespace AlifboYordamchi
                 bInputs[0].U.ki.wVk = (ushort)VK_BACK;
                 bInputs[0].U.ki.wScan = 0x0E; // Apparat Backspace scan-kodi!
                 bInputs[0].U.ki.dwFlags = 0;
+                bInputs[0].U.ki.dwExtraInfo = MAGIC_EXTRA;
 
                 bInputs[1].type = INPUT_KEYBOARD;
                 bInputs[1].U.ki.wVk = (ushort)VK_BACK;
                 bInputs[1].U.ki.wScan = 0x0E;
                 bInputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
+                bInputs[1].U.ki.dwExtraInfo = MAGIC_EXTRA;
 
                 uint bSent = SendInput(2, bInputs, Marshal.SizeOf(typeof(INPUT)));
                 if (bSent == 0)
                 {
                     // Zaxira usul: agar SendInput bloklansa, to'g'ri scan-kod bilan keybd_event orqali o'chirish
-                    keybd_event((byte)VK_BACK, 0x0E, 0, UIntPtr.Zero);
-                    keybd_event((byte)VK_BACK, 0x0E, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event((byte)VK_BACK, 0x0E, 0, (UIntPtr)0x414C4642);
+                    keybd_event((byte)VK_BACK, 0x0E, KEYEVENTF_KEYUP, (UIntPtr)0x414C4642);
                 }
 
                 // 3. Matn muharriri (Word/Chrome/Telegram) oldingi harfni to'liq o'chirib ulgurishi uchun pauza
@@ -376,11 +381,13 @@ namespace AlifboYordamchi
                 inpChar[0].U.ki.wVk = 0; // MSDN: KEYEVENTF_UNICODE bilan wVk 0 bo'lishi shart!
                 inpChar[0].U.ki.wScan = (ushort)replaceWith;
                 inpChar[0].U.ki.dwFlags = KEYEVENTF_UNICODE;
+                inpChar[0].U.ki.dwExtraInfo = MAGIC_EXTRA;
 
                 inpChar[1].type = INPUT_KEYBOARD;
                 inpChar[1].U.ki.wVk = 0;
                 inpChar[1].U.ki.wScan = (ushort)replaceWith;
                 inpChar[1].U.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+                inpChar[1].U.ki.dwExtraInfo = MAGIC_EXTRA;
 
                 uint sent = SendInput(2, inpChar, Marshal.SizeOf(typeof(INPUT)));
                 if (sent == 0)
@@ -391,9 +398,9 @@ namespace AlifboYordamchi
                 // 5. Agar foydalanuvchi barmoq bilan Shift ni bosib turgan bo'lsa, Shift holatini qayta tiklaymiz
                 if (anyShift)
                 {
-                    if (lShift) keybd_event(0xA0, 0x2A, 0, UIntPtr.Zero);
-                    if (rShift) keybd_event(0xA1, 0x36, 0, UIntPtr.Zero);
-                    if (!lShift && !rShift) keybd_event((byte)VK_SHIFT, 0x2A, 0, UIntPtr.Zero);
+                    if (lShift) keybd_event(0xA0, 0x2A, 0, (UIntPtr)0x414C4642);
+                    if (rShift) keybd_event(0xA1, 0x36, 0, (UIntPtr)0x414C4642);
+                    if (!lShift && !rShift) keybd_event((byte)VK_SHIFT, 0x2A, 0, (UIntPtr)0x414C4642);
                 }
             }
             catch { }
@@ -410,8 +417,9 @@ namespace AlifboYordamchi
             {
                 KBDLLHOOKSTRUCT kbd = (KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
 
-                // SendInput yoki keybd_event orqali yuborilgan o'zimizning signallarimizni o'tkazib yuboramiz
-                if ((kbd.flags & LLKHF_INJECTED) != 0)
+                // Faqat o'zimiz yuborgan signallarni o'tkazib yuboramiz
+                // (AnyDesk, TeamViewer va boshqa masofaviy dasturlarda ham 100% ishlashi uchun)
+                if (kbd.dwExtraInfo == MAGIC_EXTRA)
                 {
                     return CallNextHookEx(hookId, nCode, wParam, lParam);
                 }
@@ -479,13 +487,9 @@ namespace AlifboYordamchi
                 {
                     keyChar = (char)(isUpper ? ('A' + (kbd.vkCode - 0x41)) : ('a' + (kbd.vkCode - 0x41)));
                 }
-                // Apostrof: VK_OEM_7 (0xDE) Shift siz bo'lsa
-                else if (kbd.vkCode == VK_OEM_7 && !shift)
-                {
-                    keyChar = '\'';
-                }
-                // Apostrof: VK_OEM_3 (0xC0 - backtick `) Shift siz bo'lsa
-                else if (kbd.vkCode == VK_OEM_3 && !shift)
+                // Apostrof: VK_OEM_7 (0xDE) yoki VK_OEM_3 (0xC0 - backtick `)
+                // O' yoki G' yozayotganda barmoq Shift da qolib ketgan bo'lsa ham apostrof deb taniydi
+                else if (kbd.vkCode == VK_OEM_7 || kbd.vkCode == VK_OEM_3)
                 {
                     keyChar = '\'';
                 }
