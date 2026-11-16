@@ -327,7 +327,7 @@ Public Function KrillConvWord(ByVal w As String, ByVal toNew As Boolean) As Stri
         Case &H49B: piece = "q" ' қ
         Case &H4B3: piece = "h" ' ҳ
 
-        Case &H400 To &H42F
+        Case &H400 To &H42F, &H492, &H49A, &H4B2
           Select Case AscW(c)
             Case &H40E: ' Ў
               If toNew Then

@@ -105,6 +105,15 @@ namespace AlifboYordamchi
         [DllImport("user32.dll", SetLastError = true)]
         private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetKeyboardLayout(uint idThread);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
+
         [StructLayout(LayoutKind.Sequential)]
         private struct KBDLLHOOKSTRUCT
         {
@@ -230,7 +239,7 @@ namespace AlifboYordamchi
                         HookKeyboard();
                     }
                     // Operativ xotirani doim minimal (3-5 MB) darajada saqlash
-                    SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
+                    // SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1); // SSD yuklanishi va mikro-qotishlarni oldini olish uchun o'chirildi
                 }
                 catch { }
             };
@@ -437,6 +446,23 @@ namespace AlifboYordamchi
                     lastChar = '\0';
                     return CallNextHookEx(hookId, nCode, wParam, lParam);
                 }
+
+                // Faqat lotin klaviatura joylashuvi aktiv bo'lganda o'tkazish (Rus/Kirill tili tanlanganda kirmaslik)
+                try
+                {
+                    IntPtr fgWnd = GetForegroundWindow();
+                    uint threadId = GetWindowThreadProcessId(fgWnd, IntPtr.Zero);
+                    IntPtr layout = GetKeyboardLayout(threadId);
+                    int langId = (int)((long)layout & 0xFFFF);
+                    // 0x0419 = Ruscha, 0x0843 = O'zbekcha (kirill), 0x0422 = Ukraincha, 0x0423 = Belaruscha, 0x0402 = Bolgarcha
+                    if (langId == 0x0419 || langId == 0x0843 || langId == 0x0422 || langId == 0x0423 || langId == 0x0402)
+                    {
+                        lastChar = '\0';
+                        if (useBufferMode && bufferTimer != null) { bufferTimer.Stop(); FlushBuffer(); }
+                        return CallNextHookEx(hookId, nCode, wParam, lParam);
+                    }
+                }
+                catch { }
 
                 // Shift tugmasining o'zi yolg'iz bosilganda (VK_SHIFT, VK_LSHIFT, VK_RSHIFT)
                 // Buferga tegilmaydi (chunki Sh yoki O' yozilayotgan bo'lishi mumkin)
@@ -826,7 +852,8 @@ namespace AlifboYordamchi
                         int q2 = json.IndexOf('"', q1 + 1);
                         string latestVer = json.Substring(q1 + 1, q2 - q1 - 1).Trim();
 
-                        if (!string.IsNullOrEmpty(latestVer) && string.Compare(latestVer, CURRENT_VERSION, StringComparison.OrdinalIgnoreCase) > 0)
+                        Version lv, cv;
+                        if (!string.IsNullOrEmpty(latestVer) && Version.TryParse(latestVer, out lv) && Version.TryParse(CURRENT_VERSION, out cv) && lv > cv)
                         {
                             DialogResult dr = MessageBox.Show(
                                 string.Format("AlifboO'tkazgichning yangi versiyasi ({0}) mavjud!\n\nJoriy versiya: {1}\n\nYangilashni hozir yuklab olib o'rnataylikmi?", latestVer, CURRENT_VERSION),

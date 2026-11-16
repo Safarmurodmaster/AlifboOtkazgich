@@ -1,4 +1,4 @@
-# AlifboOtkazgich v1.0.3
+# AlifboOtkazgich v1.0.4
 
 Yangi o'zbek alifbosiga matnlarni o'tkazish uchun Word, Excel, PowerPoint qo'shimchalari.
 
@@ -6,4 +6,4 @@ Yangi o'zbek alifbosiga matnlarni o'tkazish uchun Word, Excel, PowerPoint qo'shi
 
 ## O'rnatish
 
-[AlifboOtkazgich-Setup.exe](https://raw.githubusercontent.com/SafarMaster/AlifboOtkazgich/main/AlifboOtkazgich-Setup.exe) ni yuklab o'rnating.
+[AlifboOtkazgich-Setup.exe](https://raw.githubusercontent.com/Safarmurodmaster/AlifboOtkazgich/main/AlifboOtkazgich-Setup.exe) ni yuklab o'rnating.

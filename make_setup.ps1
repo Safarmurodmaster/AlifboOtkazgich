@@ -3,11 +3,11 @@
 # Ishlatish: powershell -File make_setup.ps1
 
 $ErrorActionPreference = 'Stop'
-$src = "C:\Users\User\Downloads\AlifboOtkazgich-kodlar"
+$src = $PSScriptRoot; if (-not $src) { $src = Split-Path -Parent $MyInvocation.MyCommand.Path }
 $dist = "$src\dist"
 $nsis = "C:\Program Files (x86)\NSIS\makensis.exe"
 
-Write-Host "=== AlifboOtkazgich Setup Builder v1.0.3 ===" -ForegroundColor Cyan
+Write-Host "=== AlifboOtkazgich Setup Builder v1.0.4 ===" -ForegroundColor Cyan
 Write-Host ""
 
 # dist papkasini tozalash va yaratish
@@ -55,12 +55,12 @@ $nsiContent = @'
 ; Muallif: Fozliddinov Safarmurod | @Safar_master | +998939530473
 
 !define APPNAME "AlifboOtkazgich"
-!define APPVERSION "1.0.3"
+!define APPVERSION "1.0.4"
 !define PUBLISHER "Fozliddinov Safarmurod"
 !define APPDIR "$LOCALAPPDATA\AlifboOtkazgich"
 
 Name "${APPNAME} ${APPVERSION}"
-OutFile "C:\Users\User\Downloads\AlifboOtkazgich-Setup.exe"
+OutFile "AlifboOtkazgich-Setup.exe"
 InstallDir "${APPDIR}"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
@@ -120,24 +120,7 @@ Section "Asosiy"
   ; Kuchsiz (4GB RAM) kompyuterlarda klaviatura uzilib qolmasligi uchun Windows kutilma vaqtini 2000 ms ga oshiramiz
   WriteRegStr HKCU "Control Panel\Desktop" "LowLevelHooksTimeout" "2000"
 
-  ; ======================================================
-  ; Word Protected View o'chirish (ChatGPT/saytdan yuklagan
-  ; fayllar ochilishi uchun xavfsiz rejimni o'chirish)
-  ; ======================================================
-  DetailPrint "Word Protected View sozlanmoqda..."
-  WriteRegDWORD HKCU "Software\Microsoft\Office\16.0\Word\Security\ProtectedView" "DisableInternetFilesInPV" 1
-  WriteRegDWORD HKCU "Software\Microsoft\Office\16.0\Word\Security\ProtectedView" "DisableUnsafeLocationsInPV" 1
-  WriteRegDWORD HKCU "Software\Microsoft\Office\16.0\Word\Security\ProtectedView" "DisableAttachmentsInPV" 1
 
-  ; Downloads va Desktop papkalarini ishonchli joylarga qo'shish
-  ; %USERPROFILE% = C:\Users\Username — NSIS ExpandEnvStrings orqali $R0 ga olinadi
-  ExpandEnvStrings $R0 "%USERPROFILE%"
-  WriteRegStr HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDownloads" "Path" "$R0\Downloads"
-  WriteRegDWORD HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDownloads" "AllowSubFolders" 1
-  WriteRegStr HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDownloads" "Description" "AlifboOtkazgich - Downloads"
-  WriteRegStr HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDesktop" "Path" "$R0\Desktop"
-  WriteRegDWORD HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDesktop" "AllowSubFolders" 1
-  WriteRegStr HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDesktop" "Description" "AlifboOtkazgich - Desktop"
 
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME} ${APPVERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" '"${APPDIR}\Uninstall.exe"'
@@ -156,6 +139,11 @@ Section "Uninstall"
 
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "AlifboYordamchi"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+  DeleteRegValue HKCU "Software\Microsoft\Office\16.0\Word\Security\ProtectedView" "DisableInternetFilesInPV"
+  DeleteRegValue HKCU "Software\Microsoft\Office\16.0\Word\Security\ProtectedView" "DisableUnsafeLocationsInPV"
+  DeleteRegValue HKCU "Software\Microsoft\Office\16.0\Word\Security\ProtectedView" "DisableAttachmentsInPV"
+  DeleteRegKey HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDownloads"
+  DeleteRegKey HKCU "Software\Microsoft\Office\16.0\Word\Security\Trusted Locations\AlifboDesktop"
   Delete "$APPDATA\Microsoft\Word\STARTUP\AlifboOtkazgich.dotm"
   Delete "$APPDATA\Microsoft\Excel\XLSTART\AlifboOtkazgich.xlam"
   Delete "$APPDATA\Microsoft\AddIns\AlifboOtkazgich.ppam"
@@ -176,13 +164,16 @@ Push-Location $dist
 & $nsis "setup.nsi"
 $exitCode = $LASTEXITCODE
 Pop-Location
+if (Test-Path "$dist\AlifboOtkazgich-Setup.exe") {
+    Move-Item "$dist\AlifboOtkazgich-Setup.exe" "$src\AlifboOtkazgich-Setup.exe" -Force
+}
 
 if ($exitCode -ne 0) {
     Write-Host "XATO: NSIS compile xato! Kod: $exitCode" -ForegroundColor Red
     exit 1
 }
 
-$setupPath = "C:\Users\User\Downloads\AlifboOtkazgich-Setup.exe"
+$setupPath = "$src\AlifboOtkazgich-Setup.exe"
 if (Test-Path $setupPath) {
     $size = [math]::Round((Get-Item $setupPath).Length / 1MB, 2)
     Write-Host "[4/5] Setup.exe yaratildi: $size MB" -ForegroundColor Green

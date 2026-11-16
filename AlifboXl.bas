@@ -162,10 +162,54 @@ End Sub
 ' ==============================================================
 ' Excel uchun: kataklar bo'ylab kirill matn o'tkazish
 ' ==============================================================
+Private Function XlKrillConvArea(ByVal area As Object, ByVal toNew As Boolean) As Long
+  Dim arr As Variant, r As Long, c As Long, nr As Long, nc As Long
+  Dim v As String, nv As String, n As Long, changed As Boolean
+  On Error Resume Next
+  If area Is Nothing Then Exit Function
+  If area.Cells.Count = 1 Then
+    If Not IsError(area.Value) Then
+      If Not area.HasFormula Then
+        If VarType(area.Value) = vbString Then
+          v = CStr(area.Value)
+          If Len(v) > 0 And IsCyrInStr(v) Then
+            nv = KrillConvStr(v, toNew)
+            If Err.Number = 0 And Len(nv) > 0 And nv <> v Then
+              area.Value = nv
+              XlKrillConvArea = 1
+            End If
+          End If
+        End If
+      End If
+    End If
+    Exit Function
+  End If
+  arr = area.Value
+  If Not IsArray(arr) Then Exit Function
+  nr = UBound(arr, 1)
+  nc = UBound(arr, 2)
+  For r = 1 To nr
+    For c = 1 To nc
+      If VarType(arr(r, c)) = vbString Then
+        v = arr(r, c)
+        If Len(v) > 0 And IsCyrInStr(v) Then
+          nv = KrillConvStr(v, toNew)
+          If Err.Number = 0 And Len(nv) > 0 And nv <> v Then
+            arr(r, c) = nv
+            n = n + 1
+            changed = True
+          End If
+        End If
+      End If
+    Next c
+  Next r
+  If changed Then area.Value = arr
+  XlKrillConvArea = n
+End Function
+
 Public Sub KrillConvXl(ByVal toNew As Boolean)
   Dim exc As Collection, n As Long, rng As Object
-  Dim arr As Variant, r As Long, c As Long, v As String, nv As String
-  Dim changed As Boolean
+  Dim txt As Object, ar As Object
 
   If Not Gate() Then Exit Sub
   If Workbooks.Count = 0 Then Exit Sub
@@ -179,28 +223,18 @@ Public Sub KrillConvXl(ByVal toNew As Boolean)
   End If
 
   If rng.Cells.Count = 1 Then
-    If Not rng.HasFormula Then
-      v = CStr(rng.Value)
-      If IsCyrInStr(v) Then
-        nv = KrillConvStr(v, toNew)
-        If nv <> v Then rng.Value = nv: n = 1
-      End If
-    End If
+    n = XlKrillConvArea(rng, toNew)
   Else
-    arr = rng.Value
-    If IsArray(arr) Then
-      For r = 1 To UBound(arr, 1)
-        For c = 1 To UBound(arr, 2)
-          If VarType(arr(r, c)) = vbString Then
-            v = arr(r, c)
-            If IsCyrInStr(v) Then
-              nv = KrillConvStr(v, toNew)
-              If nv <> v Then arr(r, c) = nv: n = n + 1: changed = True
-            End If
-          End If
-        Next c
-      Next r
-      If changed Then rng.Value = arr
+    Set txt = Nothing
+    On Error Resume Next
+    Set txt = rng.SpecialCells(2, 2)
+    On Error GoTo XlFail
+    If txt Is Nothing Then
+      n = XlKrillConvArea(rng, toNew)
+    Else
+      For Each ar In txt.Areas
+        n = n + XlKrillConvArea(ar, toNew)
+      Next ar
     End If
   End If
 

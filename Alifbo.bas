@@ -152,12 +152,12 @@ Public Sub LicenseInfo()
   End If
   m = LeftMinutes()
   If m > 0 Then
-    t = "Sinov muddati: " & FmtLeft(m) & " qoldi."
+    t = "Sinov muddati: " & CStr(m) & " daqiqa qoldi."
   Else
     t = "Sinov muddati tugagan."
   End If
   If MsgBox(t & vbCrLf & "Litsenziya kodini kiritasizmi?" & vbCrLf & vbCrLf & AuthorText(), vbYesNo + vbQuestion, ProdName()) = vbYes Then
-    AskCode ""
+    AskCode
   End If
 End Sub
 

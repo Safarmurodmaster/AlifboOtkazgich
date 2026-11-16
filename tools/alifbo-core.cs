@@ -141,7 +141,7 @@ public static class AlifboCore
         try
         {
             if (File.Exists(path))
-                foreach (string ln in File.ReadAllLines(path, Encoding.Default))
+                foreach (string ln in File.ReadAllLines(path, Encoding.UTF8))
                 {
                     string t = ln.Trim().ToLowerInvariant();
                     if (t.Length > 0 && t[0] != '#') h.Add(t);
