@@ -74,9 +74,11 @@ If code = 0 Then
   Chk "AlifboLic import"
   pres.VBProject.VBComponents.Import dir & "\AlifboKrill.bas"
   Chk "AlifboKrill import"
+  pres.VBProject.VBComponents.Import dir & "\AlifboQk.bas"
+  Chk "AlifboQk import"
   pres.VBProject.VBComponents.Import dir & "\AlifboPpt.bas"
   Chk "AlifboPpt import"
-  If pres.VBProject.VBComponents.Count < 4 Then code = 4
+  If pres.VBProject.VBComponents.Count < 5 Then code = 4
 End If
 If code = 0 Then
   If fso.FileExists(target) Then fso.DeleteFile target, True

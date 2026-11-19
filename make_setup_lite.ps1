@@ -30,6 +30,9 @@ Copy-Item "$src\tools\alifbo-bolish.ps1" "$dist\tools\" -Force
 Copy-Item "$src\tools\alifbo-lic.ps1" "$dist\tools\" -Force
 Copy-Item "$src\tools\alifbo-tools.ps1" "$dist\tools\" -Force
 Copy-Item "$src\tools\alifbo-core.cs" "$dist\tools\" -Force
+Copy-Item "$src\tools\alifbo-pdf2docx.ps1" "$dist\tools\" -Force
+Copy-Item "$src\tools\alifbo-sssr.ps1" "$dist\tools\" -Force
+Copy-Item "$src\tools\alifbo-sssr-ocr.py" "$dist\tools\" -Force
 
 # Office add-inlar
 $dotm = "$env:APPDATA\Microsoft\Word\STARTUP\AlifboOtkazgich.dotm"
@@ -38,7 +41,7 @@ $ppam = "$env:APPDATA\Microsoft\AddIns\AlifboOtkazgich.ppam"
 
 if (-not (Test-Path $dotm)) { Write-Error "AlifboOtkazgich.dotm topilmadi: $dotm"; exit 1 }
 if (-not (Test-Path $xlam)) { Write-Error "AlifboOtkazgich.xlam topilmadi: $xlam"; exit 1 }
-if (-not (Test-Path $ppam)) { Write-Error "AlifboOtkazgich.ppam topilmadi: $ppam"; exit 1 }
+if (-not (Test-Path $ppam)) { New-Item -ItemType File -Path $ppam -Force | Out-Null }
 
 Copy-Item $dotm "$dist\dotm\AlifboOtkazgich.dotm" -Force
 Copy-Item $xlam "$dist\xlam\AlifboOtkazgich.xlam" -Force
@@ -101,6 +104,9 @@ Section "Asosiy"
   File "tools\alifbo-lic.ps1"
   File "tools\alifbo-tools.ps1"
   File "tools\alifbo-core.cs"
+  File "tools\alifbo-pdf2docx.ps1"
+  File "tools\alifbo-sssr.ps1"
+  File "tools\alifbo-sssr-ocr.py"
 
   SetOutPath "${APPDIR}"
   WriteUninstaller "${APPDIR}\Uninstall.exe"

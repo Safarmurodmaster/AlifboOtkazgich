@@ -12,6 +12,14 @@
           <button id="btnKrillNew" label="Krill &#x2192; Yangi" size="large" imageMso="ChangeCase" onAction="RbXlKrillNew" screentip="Kirill &#x2192; Yangi alifbo" supertip="Kirill alifbosidagi matnni yangi o&#x2BC;zbek alifbosiga o&#x2BC;tkazadi."/>
           <button id="btnKrillOld" label="Krill &#x2192; Lotin" size="large" imageMso="ReviewAcceptChange" onAction="RbXlKrillOld" screentip="Kirill &#x2192; Lotin alifbo" supertip="Kirill alifbosidagi matnni lotin alifbosiga o&#x2BC;tkazadi."/>
         </group>
+        <group id="grpQk" label="Qaraqalpaqsha">
+          <button id="btnQkToLat" label="Kirill &#x2192; Lat&#x131;n" size="large" imageMso="LanguagePreferences" onAction="RbXlQkToLat" screentip="Qaraqalpaqsha: Kirill &#x2192; Lat&#x131;n" supertip="Qoraqalpoq kirill matnini 2016 yilgi lotin alifbosiga o'tkazadi."/>
+          <button id="btnQkToKrill" label="Lat&#x131;n &#x2192; Kirill" size="large" imageMso="ReviewPreviousComment" onAction="RbXlQkToKrill" screentip="Qaraqalpaqsha: Lat&#x131;n &#x2192; Kirill" supertip="Qoraqalpoq lotin matnini kirill alifbosiga qaytaradi."/>
+        </group>
+        <group id="grpKz" label="Qazaqşa">
+          <button id="btnKzToLat" label="Kirill &#x2192; Lat&#x131;n" size="large" imageMso="LanguagePreferences" onAction="RbXlKzToLat" screentip="Qazaqşa: Kirill &#x2192; Lat&#x131;n" supertip="Qozoq kirill matnini 2021 yilgi lotin alifbosiga o'tkazadi."/>
+          <button id="btnKzToKrill" label="Lat&#x131;n &#x2192; Kirill" size="large" imageMso="ReviewPreviousComment" onAction="RbXlKzToKrill" screentip="Qazaqşa: Lat&#x131;n &#x2192; Kirill" supertip="Qozoq lotin matnini kirill alifbosiga qaytaradi."/>
+        </group>
         <group id="grpFiles" label="Fayllar">
           <button id="btnTools" label="Fayllarni o'tkazish" size="large" imageMso="FileOpen" onAction="RbTools" screentip="Fayllarni o'tkazish" supertip="Word, Excel, PowerPoint va matn fayllarini bir yoki ko'p qilib yangi alifboga o'tkazadi."/>
         </group>

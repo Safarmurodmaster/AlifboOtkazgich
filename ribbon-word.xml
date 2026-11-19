@@ -12,6 +12,18 @@
           <button id="btnKrillNew" label="Krill &#x2192; Yangi" size="large" imageMso="ChangeCase" onAction="RbWdKrillNew" screentip="Kirill &#x2192; Yangi alifbo" supertip="Kirill (rus) alifbosidagi matnni yangi o&#x2BC;zbek alifbosiga (&#xF6;,&#x11F;,&#x15F;,&#xE7;) o&#x2BC;tkazadi."/>
           <button id="btnKrillOld" label="Krill &#x2192; Lotin" size="large" imageMso="ReviewAcceptChange" onAction="RbWdKrillOld" screentip="Kirill &#x2192; Lotin alifbo" supertip="Kirill (rus) alifbosidagi matnni lotin alifbosiga (o&#x2BC;,g&#x2BC;,sh,ch) o&#x2BC;tkazadi."/>
         </group>
+        <group id="grpQk" label="Qaraqalpaqsha">
+          <button id="btnQkToLat" label="Kirill &#x2192; Lat&#x131;n" size="large" imageMso="LanguagePreferences" onAction="RbWdQkToLat" screentip="Qaraqalpaqsha: Kirill &#x2192; Lat&#x131;n" supertip="Qoraqalpoq kirill matnini 2016 yilgi lotin alifbosiga o'tkazadi."/>
+          <button id="btnQkToKrill" label="Lat&#x131;n &#x2192; Kirill" size="large" imageMso="ReviewPreviousComment" onAction="RbWdQkToKrill" screentip="Qaraqalpaqsha: Lat&#x131;n &#x2192; Kirill" supertip="Qoraqalpoq lotin matnini kirill alifbosiga qaytaradi."/>
+        </group>
+        <group id="grpKz" label="Qazaqşa">
+          <button id="btnKzToLat" label="Kirill &#x2192; Lat&#x131;n" size="large" imageMso="LanguagePreferences" onAction="RbWdKzToLat" screentip="Qazaqşa: Kirill &#x2192; Lat&#x131;n" supertip="Qozoq kirill matnini 2021 yilgi lotin alifbosiga o'tkazadi."/>
+          <button id="btnKzToKrill" label="Lat&#x131;n &#x2192; Kirill" size="large" imageMso="ReviewPreviousComment" onAction="RbWdKzToKrill" screentip="Qazaqşa: Lat&#x131;n &#x2192; Kirill" supertip="Qozoq lotin matnini kirill alifbosiga qaytaradi."/>
+        </group>
+        <group id="grpPdfSssr" label="PDF va SSSR Kitob">
+          <button id="btnPdfWord" label="PDF &#x2192; Word" size="large" imageMso="FileSaveAsWordDocx" onAction="RbWdPdfToWord" screentip="PDF ni Wordga o'tkazish" supertip="Ixtiyoriy PDF faylni tahrirlanuvchi Word (.docx) formatiga o'tkazadi."/>
+          <button id="btnSssrOcr" label="SSSR Kitob (OCR)" size="large" imageMso="EquationInsertGallery" onAction="RbWdSssrOcr" screentip="SSSR Sariq Kitoblari (OCR va Formulalar)" supertip="Sarg'aygan qog'ozni oqartirib, formulalarni buzmasdan kirilldan lotinga o'tkazadi."/>
+        </group>
         <group id="grpTools" label="Sozlamalar va Fayllar">
           <button id="btnExc" label="Istisnolar" size="normal" imageMso="SpellingAndGrammar" onAction="RbWdExc" screentip="Istisnolar ro'yxati" supertip="O'zgartirilmaydigan so'zlar ro'yxatini tahrirlash."/>
           <button id="btnTools" label="Fayllar oynasi" size="large" imageMso="FileOpen" onAction="RbWdTools" screentip="Fayllarni o'tkazish" supertip="Word, Excel, PowerPoint fayllarini ommaviy o'tkazish oynasi."/>

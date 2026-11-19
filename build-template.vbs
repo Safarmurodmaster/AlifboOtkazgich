@@ -32,6 +32,8 @@ If code = 0 Then
   d.VBProject.VBComponents.Import dir & "\AlifboCore.bas"
   d.VBProject.VBComponents.Import dir & "\AlifboLic.bas"
   d.VBProject.VBComponents.Import dir & "\AlifboKrill.bas"
+  d.VBProject.VBComponents.Import dir & "\AlifboQk.bas"
+  d.VBProject.VBComponents.Import dir & "\AlifboKz.bas"
   If Err.Number <> 0 Then code = 4
 End If
 If code = 0 Then

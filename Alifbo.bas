@@ -1382,3 +1382,40 @@ Public Sub KrillToOld()
   KrillConvDoc False
   SafeUndoEnd
 End Sub
+
+' ==============================================================
+' Qozoq tili, PDF to Word va SSSR Kitoblari (Ribbon & Tools)
+' ==============================================================
+Public Sub PdfToWordTool()
+  Dim p As String
+  p = Environ("LOCALAPPDATA") & "\AlifboOtkazgich\tools\alifbo-pdf2docx.ps1"
+  If Dir(p) = "" Then
+    p = "E:\ekran\new alifbo\AlifboOtkazgich-kodlar\tools\alifbo-pdf2docx.ps1"
+  End If
+  If Dir(p) = "" Then
+    MsgBox "PDF vositasi topilmadi.", vbExclamation, ProdName()
+    Exit Sub
+  End If
+  Shell "powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File """ & p & """", vbNormalFocus
+End Sub
+
+Public Sub SssrOcrTool()
+  Dim p As String
+  p = Environ("LOCALAPPDATA") & "\AlifboOtkazgich\tools\alifbo-sssr.ps1"
+  If Dir(p) = "" Then
+    p = "E:\ekran\new alifbo\AlifboOtkazgich-kodlar\tools\alifbo-sssr.ps1"
+  End If
+  If Dir(p) = "" Then
+    MsgBox "SSSR kitob vositasi topilmadi.", vbExclamation, ProdName()
+    Exit Sub
+  End If
+  Shell "powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File """ & p & """", vbNormalFocus
+End Sub
+
+Public Sub RbWdPdfToWord(control As IRibbonControl)
+  PdfToWordTool
+End Sub
+
+Public Sub RbWdSssrOcr(control As IRibbonControl)
+  SssrOcrTool
+End Sub
