@@ -1435,7 +1435,7 @@ Public Sub SssrOcrTool()
     p = "E:\ekran\new alifbo\AlifboOtkazgich-kodlar\tools\alifbo-sssr-gui.ps1"
   End If
   If Dir(p) = "" Then
-    MsgBox "SSSR kitob vositasi topilmadi.", vbExclamation, ProdName()
+    MsgBox "Sariq kitob vositasi topilmadi.", vbExclamation, ProdName()
     Exit Sub
   End If
   Shell "powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & p & """", vbHide

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 ==============================================================
-alifbo-sssr-ocr.py - SSSR Sariq Kitoblarini Wordga O'tkazuvchi
-Formulalarni saqlovchi va kirilldan lotinga o'tkazuvchi intellektual tizim
+alifbo-sssr-ocr.py - Sariq va Qadimgi Kitoblarni Wordga O'tkazuvchi
+Formulalarni saqlovchi, sahifalarni saralovchi va kirilldan lotinga o'tkazuvchi
 Muallif: Fozliddinov Safarmurod | @Safar_master | +998939530473
 ==============================================================
 """
@@ -10,10 +10,9 @@ Muallif: Fozliddinov Safarmurod | @Safar_master | +998939530473
 import os
 import sys
 import re
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+import traceback
 
-# Transliteratsiya xaritasi (Kirill -> Lotin)
+# Kirill -> Lotin
 CYR_TO_LAT = {
     'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
     'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
@@ -24,21 +23,18 @@ CYR_TO_LAT = {
     'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'Yo',
     'Ж': 'J', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
     'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
-    'Ф': 'F', 'Х': 'X', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sh',
+    'Ф': 'F', 'Х': 'X', 'Ц': 'Ts', 'Ч': 'Ch', 'SH': 'Sh', 'Щ': 'Sh',
     'Ъ': "'", 'Ы': 'I', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
     'Ў': "O'", 'Ғ': "G'", 'Қ': 'Q', 'Ҳ': 'H'
 }
 
-# Matematik formulalarni va belgilarni aniqlash
 MATH_SYMBOLS = set("=+-*/^<≤>≥≠≈±∑∫∬∭∮√∝∞∂∇∈∉⊂⊆∪∩∧∨¬⇒⇔∀∃θλαβγδεζηικμνξπρστυφχψωΔΣΩ")
 MATH_FUNCS = {"sin", "cos", "tg", "tan", "ctg", "cot", "sec", "cosec", "ln", "lg", "log", "exp", "lim", "max", "min", "det", "arg"}
 
 def is_math_token(token):
-    """Token matematika formulasi yoki o'zgaruvchi ekanligini aniqlash"""
     t_clean = token.strip("(),;:.[]{}")
     if not t_clean:
         return False
-    # Faqat lotin harflari va raqamlardan iborat qisqa o'zgaruvchi (x, y, f(x), x^2, a_1)
     if any(c in MATH_SYMBOLS for c in token):
         return True
     if t_clean.lower() in MATH_FUNCS:
@@ -47,14 +43,12 @@ def is_math_token(token):
         return True
     return False
 
-def transliterate_text_preserving_math(text, to_new=False):
-    """Matnni kirilldan lotinga o'tkazadi, lekin formulalarga aslo tegmaydi"""
+def transliterate_text_preserving_math(text):
+    """Formulalarga teginmasdan matnni lotinga o'tkazadi"""
     lines = text.split('\n')
     out_lines = []
-
     for line in lines:
         stripped = line.strip()
-        # Agar qator to'liq formula bo'lsa (masalan: y = f(x) + C)
         if any(sym in stripped for sym in "=<>≤≥∑∫√"):
             words = line.split(' ')
             line_parts = []
@@ -62,202 +56,177 @@ def transliterate_text_preserving_math(text, to_new=False):
                 if is_math_token(w):
                     line_parts.append(w)
                 else:
-                    # Matn so'zini o'tkazish
-                    converted = ""
-                    for ch in w:
-                        converted += CYR_TO_LAT.get(ch, ch)
+                    converted = "".join(CYR_TO_LAT.get(ch, ch) for ch in w)
                     line_parts.append(converted)
             out_lines.append(" ".join(line_parts))
         else:
-            # Oddiy matn qatori
-            converted = ""
-            for ch in line:
-                converted += CYR_TO_LAT.get(ch, ch)
+            converted = "".join(CYR_TO_LAT.get(ch, ch) for ch in line)
             out_lines.append(converted)
-
     return "\n".join(out_lines)
 
-def process_sssr_file(file_path, target_docx, to_latin=True, log_cb=None):
-    """SSSR kitob sahifasini (PDF yoki Rasm) tozalab, Wordga saqlash"""
-    if log_cb: log_cb(f"Fayl tahlil qilinmoqda: {os.path.basename(file_path)}")
+def parse_page_range(range_str, total_pages):
+    """
+    '1-100', '1, 3, 5-10', '15-' kabi formatlarni tahlil qiladi (1-based index)
+    0-based indekslar ro'yxatini qaytaradi
+    """
+    if not range_str or not range_str.strip() or range_str.strip().lower() in ['all', 'barchasi', 'hammasi', '*']:
+        return list(range(total_pages))
 
-    ext = os.path.splitext(file_path)[1].lower()
-    extracted_text = ""
+    pages = set()
+    parts = [p.strip() for p in range_str.split(',') if p.strip()]
+    for part in parts:
+        if '-' in part:
+            seg = part.split('-')
+            start_str = seg[0].strip()
+            end_str = seg[1].strip() if len(seg) > 1 else ""
 
-    # Agar PDF bo'lsa
-    if ext == ".pdf":
-        try:
-            import pypdf
-            reader = pypdf.PdfReader(file_path)
-            for page_idx, page in enumerate(reader.pages):
-                txt = page.extract_text() or ""
-                extracted_text += f"\n--- {page_idx+1}-bet ---\n" + txt
-        except Exception:
-            # Word orqali to'g'ridan-to'g'ri reflow qilish
-            pass
+            start = int(start_str) if start_str.isdigit() else 1
+            end = int(end_str) if end_str.isdigit() else total_pages
 
-    # Agar rasm bo'lsa (JPG, PNG, TIFF) yoki skaner qilingan PDF
-    if not extracted_text.strip():
-        # Rasmni sarg'aygan fondan tozalash (Adaptive thresholding)
-        try:
-            from PIL import Image, ImageEnhance, ImageFilter
-            img = Image.open(file_path).convert('L') # Kulrang rangga o'tkazish
-            # Kontrastni kuchaytirish (sarg'aygan qog'ozni oqartirish)
-            enhancer = ImageEnhance.Contrast(img)
-            img = enhancer.enhance(2.2)
-            # Sho'xlik va g'uborlarni kamaytirish
-            img = img.filter(ImageFilter.MedianFilter(size=3))
-            
-            # OCR mavjud bo'lsa pytesseract
-            try:
-                import pytesseract
-                extracted_text = pytesseract.image_to_string(img, lang='rus+uzb+eng')
-            except Exception:
-                extracted_text = "[Rasm sifati yaxshilandi va oqartirildi. Matn Wordga joylashtirildi]"
-        except Exception as e:
-            if log_cb: log_cb(f"Ogohlantirish: {e}")
+            start = max(1, min(start, total_pages))
+            end = max(1, min(end, total_pages))
+            if start > end:
+                start, end = end, start
 
-    if to_latin and extracted_text:
-        if log_cb: log_cb("Kirill matn lotin alifbosiga o'tkazilmoqda (formulalar saqlangan holda)...")
-        final_text = transliterate_text_preserving_math(extracted_text)
+            for p in range(start, end + 1):
+                pages.add(p - 1)
+        elif part.isdigit():
+            p = int(part)
+            if 1 <= p <= total_pages:
+                pages.add(p - 1)
+
+    return sorted(list(pages)) if pages else list(range(total_pages))
+
+def extract_pdf_pages_fitz(src_pdf, target_pdf, page_indices):
+    """PyMuPDF yordamida faqat kerakli sahifalarni ajratib yangi PDF yaratadi"""
+    import fitz
+    doc = fitz.open(src_pdf)
+    new_doc = fitz.open()
+    for idx in page_indices:
+        if 0 <= idx < len(doc):
+            new_doc.insert_pdf(doc, from_page=idx, to_page=idx)
+    new_doc.save(target_pdf)
+    new_doc.close()
+    doc.close()
+    return target_pdf
+
+def convert_pdf_to_word_native(pdf_path, out_docx, page_range=""):
+    """
+    PDF faylni Word orqali to'g'ridan-to'g'ri va xavfsiz (reflow bilan) Wordga o'tkazish.
+    Sahifalar oralig'i berilgan bo'lsa, avval PyMuPDF bilan ajratib olinadi.
+    """
+    temp_pdf = None
+    import fitz
+    doc = fitz.open(pdf_path)
+    total_pages = len(doc)
+    doc.close()
+
+    indices = parse_page_range(page_range, total_pages)
+
+    # Agar sahifalar kesilishi kerak bo'lsa
+    if len(indices) < total_pages:
+        temp_pdf = os.path.join(os.path.dirname(out_docx), f"_temp_pages_{os.getpid()}.pdf")
+        extract_pdf_pages_fitz(pdf_path, temp_pdf, indices)
+        process_pdf = temp_pdf
     else:
-        final_text = extracted_text
+        process_pdf = pdf_path
 
-    # Word hujjatini yaratish
+    # pdf2docx yoki Word COM orqali o'tkazamiz
     try:
-        from docx import Document
-        from docx.shared import Pt, Inches, RGBColor
-        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from pdf2docx import Converter
+        cv = Converter(process_pdf)
+        cv.convert(out_docx)
+        cv.close()
+        return True, len(indices), total_pages
+    except Exception as e_pdf2docx:
+        # Fallback: Word COM
+        import win32com.client
+        word = None
+        w_doc = None
+        try:
+            word = win32com.client.DispatchEx("Word.Application")
+            word.Visible = False
+            word.DisplayAlerts = 0
+            w_doc = word.Documents.Open(os.path.abspath(process_pdf), False, False, False)
+            w_doc.SaveAs2(os.path.abspath(out_docx), 16) # wdFormatXMLDocument = 16
+            w_doc.Close(False)
+            w_doc = None
+            word.Quit()
+            word = None
+            return True, len(indices), total_pages
+        except Exception as e_word:
+            if w_doc:
+                try: w_doc.Close(False)
+                except: pass
+            if word:
+                try: word.Quit()
+                except: pass
+            raise Exception(f"Word va pdf2docx ikkisi ham xato berdi: {e_word}")
+    finally:
+        if temp_pdf and os.path.exists(temp_pdf):
+            try: os.remove(temp_pdf)
+            except: pass
 
-        doc = Document()
-        # Hujjat sarlavhasi
-        title_p = doc.add_paragraph()
-        run = title_p.add_run("SSSR Kitobi - Word va Lotin Nusxasi")
-        run.bold = True
-        run.font.size = Pt(16)
-        run.font.color.rgb = RGBColor(0, 51, 102)
-        title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-        sub_p = doc.add_paragraph()
-        sub_run = sub_p.add_run(f"Asl fayl: {os.path.basename(file_path)} | AlifboOtkazgich tizimi orqali tiklandi")
-        sub_run.font.size = Pt(9)
-        sub_run.italic = True
-        sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-        doc.add_paragraph("") # Bo'sh qator
-
-        # Matn va formulalarni paragrafma-paragraf kiritish
-        for para in final_text.split('\n\n'):
-            para_clean = para.strip()
-            if not para_clean:
-                continue
-            p = doc.add_paragraph()
-            p.paragraph_format.line_spacing = 1.15
-            p.paragraph_format.space_after = Pt(6)
-            
-            # Agar formula qatori bo'lsa, ajratib ko'rsatish
-            if any(sym in para_clean for sym in "=∑∫∬√≤≥") and len(para_clean) < 120:
-                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                r = p.add_run(para_clean)
-                r.bold = True
-                r.font.name = "Cambria Math"
-                r.font.size = Pt(12)
-            else:
-                r = p.add_run(para_clean)
-                r.font.name = "Times New Roman"
-                r.font.size = Pt(12)
-
-        doc.save(target_docx)
-        if log_cb: log_cb(f"Muvaffaqiyatli saqlandi: {target_docx}")
-        return True
-    except Exception as e:
-        # docx kutubxonasi bo'lmasa, oddiy rtf/txt yoki Word COM orqali
-        with open(target_docx.replace('.docx', '.txt'), 'w', encoding='utf-8') as f:
-            f.write(final_text)
-        if log_cb: log_cb(f"Matn saqlandi: {target_docx.replace('.docx', '.txt')}")
-        return True
-
-class SssrOcrApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("AlifboOtkazgich - SSSR Sariq Kitoblari Tiklovchi (Word & Formula)")
-        self.root.geometry("640x480")
-        self.root.resizable(False, False)
-
-        # UI Elementlar
-        lbl_title = tk.Label(root, text="SSSR Sariq Kitoblari va Formulalarini Wordga O'tkazish", 
-                             font=("Arial", 12, "bold"), fg="#003366")
-        lbl_title.pack(pady=10)
-
-        lbl_desc = tk.Label(root, text="Sarg'aygan qog'oz fonini oqartiradi, matematik formulalarni buzmasdan saqlaydi\nva kirill matnlarini avtomatik ravishda lotin alifbosiga o'tkazadi.",
-                            font=("Arial", 9), fg="#555555")
-        lbl_desc.pack(pady=5)
-
-        frm_input = tk.Frame(root)
-        frm_input.pack(fill="x", padx=20, pady=10)
-
-        self.txt_path = tk.Entry(frm_input, font=("Arial", 10), width=50)
-        self.txt_path.pack(side="left", padx=(0, 10), fill="x", expand=True)
-
-        btn_browse = tk.Button(frm_input, text="Faylni tanlash...", command=self.browse_file, bg="#0066cc", fg="white", font=("Arial", 9, "bold"))
-        btn_browse.pack(side="right")
-
-        self.chk_latin_var = tk.BooleanVar(value=True)
-        chk_latin = tk.Checkbutton(root, text="Kirill matnlarni avtomatik ravishda Lotin alifbosiga o'tkazish (formulalar o'zgarmaydi)",
-                                   variable=self.chk_latin_var, font=("Arial", 9))
-        chk_latin.pack(anchor="w", padx=20, pady=5)
-
-        btn_run = tk.Button(root, text="Hujjatni Tiklash va Word (.docx) Yaratish", 
-                            command=self.run_process, bg="#28a745", fg="white", font=("Arial", 11, "bold"), height=2)
-        btn_run.pack(fill="x", padx=20, pady=10)
-
-        lbl_log = tk.Label(root, text="Jarayon holati:", font=("Arial", 9, "bold"))
-        lbl_log.pack(anchor="w", padx=20)
-
-        self.log_box = tk.Text(root, height=10, font=("Consolas", 9), bg="#f8f9fa", state="disabled")
-        self.log_box.pack(fill="both", padx=20, pady=(0, 10))
-
-    def log(self, msg):
-        self.log_box.config(state="normal")
-        self.log_box.insert("end", msg + "\n")
-        self.log_box.see("end")
-        self.log_box.config(state="disabled")
-        self.root.update()
-
-    def browse_file(self):
-        f = filedialog.askopenfilename(
-            title="SSSR kitob sahifasini tanlang",
-            filetypes=[("Hujjatlar va Rasmlar", "*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp"), ("Barcha fayllar", "*.*")]
-        )
-        if f:
-            self.txt_path.delete(0, "end")
-            self.txt_path.insert(0, f)
-
-    def run_process(self):
-        src = self.txt_path.get().strip()
-        if not src or not os.path.exists(src):
-            messagebox.showwarning("Fayl tanlanmadi", "Iltimos, avval SSSR kitob faylini tanlang!")
-            return
-
-        target_docx = os.path.splitext(src)[0] + "_Lotin.docx"
-        self.log("Jarayon boshlandi...")
-        success = process_sssr_file(src, target_docx, to_latin=self.chk_latin_var.get(), log_cb=self.log)
-
-        if success:
-            self.log("Bajarildi! Fayl yaratildi.")
-            messagebox.showinfo("Muvaffaqiyatli!", f"SSSR kitobi tiklandi va Word fayli yaratildi:\n{target_docx}")
-            try:
-                os.startfile(target_docx)
-            except Exception:
-                pass
+def post_process_docx_latin(docx_path):
+    """Tayyor .docx hujjatidagi matnlarni formulalarga teginmasdan kirilldan lotinga o'tkazish"""
+    from docx import Document
+    doc = Document(docx_path)
+    for p in doc.paragraphs:
+        if p.text and any('\u0400' <= c <= '\u04FF' for c in p.text):
+            for run in p.runs:
+                if run.text and any('\u0400' <= c <= '\u04FF' for c in run.text):
+                    run.text = transliterate_text_preserving_math(run.text)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for p in cell.paragraphs:
+                    if p.text and any('\u0400' <= c <= '\u04FF' for c in p.text):
+                        for run in p.runs:
+                            if run.text and any('\u0400' <= c <= '\u04FF' for c in run.text):
+                                run.text = transliterate_text_preserving_math(run.text)
+    doc.save(docx_path)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] != "":
-        # CLI rejim
-        src = sys.argv[1]
-        out = os.path.splitext(src)[0] + "_Lotin.docx"
-        process_sssr_file(src, out, to_latin=True, log_cb=print)
+    if len(sys.argv) < 2:
+        print("Foydalanish: python alifbo-sssr-ocr.py <fayl_yo'li> [sahifalar] [lotin:1/0]")
+        sys.exit(1)
+
+    src_file = sys.argv[1]
+    pages_arg = sys.argv[2] if len(sys.argv) > 2 else ""
+    to_latin = sys.argv[3] != "0" if len(sys.argv) > 3 else True
+
+    dot_pos = src_file.rfind('.')
+    out_docx = (src_file[:dot_pos] if dot_pos > 0 else src_file) + "_Word.docx"
+
+    print(f"Boshlandi: {os.path.basename(src_file)}")
+    print(f"Sahifalar: {pages_arg if pages_arg else 'Barchasi'}")
+
+    ext = os.path.splitext(src_file)[1].lower()
+    if ext == ".pdf":
+        ok, proc_count, tot_count = convert_pdf_to_word_native(src_file, out_docx, pages_arg)
+        print(f"O'tkazildi: {proc_count}/{tot_count} sahifa Word (.docx) ga aylantirildi.")
+        if to_latin:
+            print("Formulalar saqlanib, kirill matn lotin alifbosiga o'tkazilmoqda...")
+            post_process_docx_latin(out_docx)
+            print("Lotinlashtirish yakunlandi.")
     else:
-        root = tk.Tk()
-        app = SssrOcrApp(root)
-        root.mainloop()
+        # Rasm fayl (JPG, PNG)
+        from docx import Document
+        from PIL import Image, ImageEnhance, ImageFilter
+        img = Image.open(src_file).convert('L')
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(2.2)
+        cleaned_path = src_file + "_cleaned.png"
+        img.save(cleaned_path)
+        doc = Document()
+        p = doc.add_paragraph()
+        r = p.add_run("Qadimgi kitob sahifasi (Tozalangan va oqartirilgan):")
+        r.bold = True
+        doc.add_picture(cleaned_path)
+        doc.save(out_docx)
+        if os.path.exists(cleaned_path):
+            try: os.remove(cleaned_path)
+            except: pass
+        print("Rasm tozalandi va Wordga saqlandi.")
+
+    print("TAYYOR: " + out_docx)

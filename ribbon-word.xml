@@ -20,9 +20,9 @@
           <button id="btnKzToLat" label="Kirill &#x2192; Lat&#x131;n" size="large" imageMso="LanguagePreferences" onAction="RbWdKzToLat" screentip="Qazaqşa: Kirill &#x2192; Lat&#x131;n" supertip="Qozoq kirill matnini 2021 yilgi lotin alifbosiga o'tkazadi."/>
           <button id="btnKzToKrill" label="Lat&#x131;n &#x2192; Kirill" size="large" imageMso="ReviewPreviousComment" onAction="RbWdKzToKrill" screentip="Qazaqşa: Lat&#x131;n &#x2192; Kirill" supertip="Qozoq lotin matnini kirill alifbosiga qaytaradi."/>
         </group>
-        <group id="grpPdfSssr" label="PDF va SSSR Kitob">
+        <group id="grpPdfSssr" label="PDF va Sariq Kitob">
           <button id="btnPdfWord" label="PDF &#x2192; Word" size="large" imageMso="FileSaveAsWordDocx" onAction="RbWdPdfToWord" screentip="PDF ni Wordga o'tkazish" supertip="Ixtiyoriy PDF faylni tahrirlanuvchi Word (.docx) formatiga o'tkazadi."/>
-          <button id="btnSssrOcr" label="SSSR Kitob (OCR)" size="large" imageMso="EquationInsertGallery" onAction="RbWdSssrOcr" screentip="SSSR Sariq Kitoblari (OCR va Formulalar)" supertip="Sarg'aygan qog'ozni oqartirib, formulalarni buzmasdan kirilldan lotinga o'tkazadi."/>
+          <button id="btnSssrOcr" label="Sariq Kitob (OCR)" size="large" imageMso="EquationInsertGallery" onAction="RbWdSssrOcr" screentip="Sariq va Qadimgi Kitoblar (OCR va Formulalar)" supertip="Sarg'aygan qog'ozni oqartirib, formulalarni buzmasdan kirilldan lotinga o'tkazadi. Sahifalar oralig'ini tanlash imkoniyati bilan."/>
         </group>
         <group id="grpTools" label="Sozlamalar va Fayllar">
           <button id="btnExc" label="Istisnolar" size="normal" imageMso="SpellingAndGrammar" onAction="RbWdExc" screentip="Istisnolar ro'yxati" supertip="O'zgartirilmaydigan so'zlar ro'yxatini tahrirlash."/>
