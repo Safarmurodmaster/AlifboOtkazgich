@@ -33,6 +33,7 @@ Copy-Item "$src\tools\alifbo-core.cs" "$dist\tools\" -Force
 Copy-Item "$src\tools\alifbo-pdf2docx.ps1" "$dist\tools\" -Force
 Copy-Item "$src\tools\alifbo-sssr.ps1" "$dist\tools\" -Force
 Copy-Item "$src\tools\alifbo-sssr-ocr.py" "$dist\tools\" -Force
+Copy-Item "$src\tools\alifbo-sssr-gui.ps1" "$dist\tools\" -Force
 
 # Office add-inlar
 $dotm = "$env:APPDATA\Microsoft\Word\STARTUP\AlifboOtkazgich.dotm"
@@ -107,6 +108,7 @@ Section "Asosiy"
   File "tools\alifbo-pdf2docx.ps1"
   File "tools\alifbo-sssr.ps1"
   File "tools\alifbo-sssr-ocr.py"
+  File "tools\alifbo-sssr-gui.ps1"
 
   SetOutPath "${APPDIR}"
   WriteUninstaller "${APPDIR}\Uninstall.exe"

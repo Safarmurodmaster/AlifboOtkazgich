@@ -1387,29 +1387,58 @@ End Sub
 ' Qozoq tili, PDF to Word va SSSR Kitoblari (Ribbon & Tools)
 ' ==============================================================
 Public Sub PdfToWordTool()
-  Dim p As String
-  p = Environ("LOCALAPPDATA") & "\AlifboOtkazgich\tools\alifbo-pdf2docx.ps1"
-  If Dir(p) = "" Then
-    p = "E:\ekran\new alifbo\AlifboOtkazgich-kodlar\tools\alifbo-pdf2docx.ps1"
+  Dim fd As Object, pdfPath As String, docxPath As String, newDoc As Object
+  Dim baseName As String, dotPos As Long
+
+  On Error GoTo ErrPdf
+  Set fd = Application.FileDialog(1) ' msoFileDialogOpen
+  With fd
+    .Title = "Word (.docx) ga o'tkaziladigan PDF faylni tanlang"
+    .Filters.Clear
+    .Filters.Add "PDF Hujjatlar (*.pdf)", "*.pdf"
+    .Filters.Add "Barcha fayllar (*.*)", "*.*"
+    .AllowMultiSelect = False
+    If .Show <> -1 Then Exit Sub
+    pdfPath = .SelectedItems(1)
+  End With
+
+  Application.StatusBar = "PDF Word formatiga aylantirilmoqda, iltimos kuting..."
+  DoEvents
+
+  ' Word-ning o'zida to'g'ridan-to'g'ri, tezkor DOCX ga ochish
+  Set newDoc = Documents.Open(FileName:=pdfPath, ConfirmConversions:=False, ReadOnly:=False, AddToRecentFiles:=True, Visible:=True)
+
+  If Not newDoc Is Nothing Then
+    dotPos = InStrRev(pdfPath, ".")
+    If dotPos > 0 Then baseName = Left$(pdfPath, dotPos - 1) Else baseName = pdfPath
+    docxPath = baseName & ".docx"
+
+    On Error Resume Next
+    newDoc.SaveAs2 FileName:=docxPath, FileFormat:=16 ' wdFormatXMLDocument (.docx)
+    On Error GoTo ErrPdf
+
+    Application.StatusBar = ""
+    MsgBox "PDF muvaffaqiyatli Word (.docx) holatiga o'tkazildi va ochildi!" & vbCrLf & vbCrLf & _
+           "Saqlangan fayl: " & docxPath, vbInformation, "Alifbo - PDF to Word"
   End If
-  If Dir(p) = "" Then
-    MsgBox "PDF vositasi topilmadi.", vbExclamation, ProdName()
-    Exit Sub
-  End If
-  Shell "powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File """ & p & """", vbNormalFocus
+  Exit Sub
+
+ErrPdf:
+  Application.StatusBar = ""
+  MsgBox "Xatolik: " & Err.Description, vbExclamation, "Alifbo - PDF to Word"
 End Sub
 
 Public Sub SssrOcrTool()
   Dim p As String
-  p = Environ("LOCALAPPDATA") & "\AlifboOtkazgich\tools\alifbo-sssr.ps1"
+  p = Environ("LOCALAPPDATA") & "\AlifboOtkazgich\tools\alifbo-sssr-gui.ps1"
   If Dir(p) = "" Then
-    p = "E:\ekran\new alifbo\AlifboOtkazgich-kodlar\tools\alifbo-sssr.ps1"
+    p = "E:\ekran\new alifbo\AlifboOtkazgich-kodlar\tools\alifbo-sssr-gui.ps1"
   End If
   If Dir(p) = "" Then
     MsgBox "SSSR kitob vositasi topilmadi.", vbExclamation, ProdName()
     Exit Sub
   End If
-  Shell "powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File """ & p & """", vbNormalFocus
+  Shell "powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & p & """", vbHide
 End Sub
 
 Public Sub RbWdPdfToWord(control As IRibbonControl)
