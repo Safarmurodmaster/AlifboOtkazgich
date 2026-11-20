@@ -1,4 +1,4 @@
-﻿Attribute VB_Name = "Alifbo"
+Attribute VB_Name = "Alifbo"
 Option Explicit
 
 Private ev As clsAppEvents
