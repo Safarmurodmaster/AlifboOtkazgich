@@ -1190,7 +1190,7 @@ End Sub
 Private Sub ScheduleTick()
   If tickScheduled Then Exit Sub
   tickScheduled = True
-  Application.OnTime Now + TimeValue("00:00:01"), "Alifbo.Tick"
+  Application.OnTime Now + TimeValue("00:00:01"), "Tick"
 End Sub
 
 Public Sub Tick()
@@ -1280,17 +1280,17 @@ Public Sub AutoExec()
   Dim d0 As Long
   d0 = LeftMinutes()
   Set cb = Application.CommandBars.Add("Alifbo", 1, False, True)
-  AddBtn cb, "Yangi alifbo", "Alifbo.ToNew", "Matnni yangi alifboga o'tkazish (belgilangan qism yoki butun hujjat)"
-  AddBtn cb, "Eski alifbo", "Alifbo.ToOld", "Yangi alifbodan eskisiga qaytarish"
-  AddBtn cb, "Istisnolar", "Alifbo.EditExc", "O'zgartirilmaydigan so'zlar ro'yxati"
-  AddBtn cb, "Avto: o'chirilgan", "Alifbo.ToggleAuto", "Eskicha yozing, dastur har bir so'zni yangi alifboga o'zi o'tkazadi", "alifbo_auto"
-  AddBtn cb, "Ctrl+V: YOQILGAN", "Alifbo.TogglePaste", "Joylashda (Ctrl+V) matnni avtomatik to'g'rilash", "alifbo_paste"
-  AddBtn cb, "Litsenziya", "Alifbo.LicenseInfo", "Sinov muddati va litsenziya kodi"
-  AddBtn cb, "Diagnostika", "Alifbo.Diag", "Dastur holatini ko'rsatadi"
-  AddBtn cb, "Varaqlarni bo'lish", "Alifbo.SplitTool", "Varaqlarni bo'lish oynasi: tartib, format, papka va nom tanlanadi"
-  AddBtn cb, "Bo'lish (oddiy)", "Alifbo.SplitDoc", "Hujjatni varaqlar bo'yicha alohida fayllarga saqlaydi (oddiy usul)"
-  AddBtn cb, "Fayllar", "Alifbo.OpenTools", "Fayllarni (Word, Excel, PowerPoint) yangi alifboga o'tkazish oynasi"
-  AddBtn cb, "Muallif", "Alifbo.About", "Dastur muallifi va aloqa"
+  AddBtn cb, "Yangi alifbo", "ToNew", "Matnni yangi alifboga o'tkazish (belgilangan qism yoki butun hujjat)"
+  AddBtn cb, "Eski alifbo", "ToOld", "Yangi alifbodan eskisiga qaytarish"
+  AddBtn cb, "Istisnolar", "EditExc", "O'zgartirilmaydigan so'zlar ro'yxati"
+  AddBtn cb, "Avto: o'chirilgan", "ToggleAuto", "Eskicha yozing, dastur har bir so'zni yangi alifboga o'zi o'tkazadi", "alifbo_auto"
+  AddBtn cb, "Ctrl+V: YOQILGAN", "TogglePaste", "Joylashda (Ctrl+V) matnni avtomatik to'g'rilash", "alifbo_paste"
+  AddBtn cb, "Litsenziya", "LicenseInfo", "Sinov muddati va litsenziya kodi"
+  AddBtn cb, "Diagnostika", "Diag", "Dastur holatini ko'rsatadi"
+  AddBtn cb, "Varaqlarni bo'lish", "SplitTool", "Varaqlarni bo'lish oynasi: tartib, format, papka va nom tanlanadi"
+  AddBtn cb, "Bo'lish (oddiy)", "SplitDoc", "Hujjatni varaqlar bo'yicha alohida fayllarga saqlaydi (oddiy usul)"
+  AddBtn cb, "Fayllar", "OpenTools", "Fayllarni (Word, Excel, PowerPoint) yangi alifboga o'tkazish oynasi"
+  AddBtn cb, "Muallif", "About", "Dastur muallifi va aloqa"
   cb.Visible = True
   Set ev = New clsAppEvents
   Set ev.App = Application
