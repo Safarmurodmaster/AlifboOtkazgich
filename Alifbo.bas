@@ -1,4 +1,4 @@
-Attribute VB_Name = "Alifbo"
+﻿Attribute VB_Name = "Alifbo"
 Option Explicit
 
 Private ev As clsAppEvents
@@ -304,9 +304,36 @@ Private Sub SafeUndoEnd()
   On Error GoTo 0
 End Sub
 
+Private Sub FixAllCapsShCh(ByVal rng As Range)
+  Dim w As Range, t As String, cl As String, i As Long, isUp As Boolean, ch As String
+  On Error Resume Next
+  For Each w In rng.Words
+    t = w.Text
+    If InStr(t, uSUp()) > 0 Or InStr(t, uCUp()) > 0 Then
+      cl = Trim$(t)
+      If Len(cl) >= 2 Then
+        isUp = True
+        For i = 1 To Len(cl)
+          ch = Mid$(cl, i, 1)
+          If ch = LCase$(ch) And ch <> UCase$(ch) Then
+            isUp = False
+            Exit For
+          End If
+        Next i
+        If isUp Then
+          t = Replace(t, uSUp(), "SH")
+          t = Replace(t, uCUp(), "CH")
+          w.Text = t
+        End If
+      End If
+    End If
+  Next w
+  Err.Clear
+End Sub
+
 Private Sub DoConvert(ByVal toNewAlpha As Boolean)
   Dim exc As Collection, orig() As String, cnt As Long
-  Dim L As String, A As String, AA As String, U As String, app As Object
+  Dim L As String, A As String, AA As String, U As String, app As Object, trgRng As Range
   If Not Gate() Then Exit Sub
   On Error GoTo Fail
   Set app = Application
@@ -336,10 +363,12 @@ Private Sub DoConvert(ByVal toNewAlpha As Boolean)
     Rep "ch", uCLo(), False
     Rep "cH", uCLo(), False
   Else
-    Rep uSUp() & "([" & U & "])", "SH\1", True
-    Rep "([" & U & "])" & uSUp(), "\1SH", True
-    Rep uCUp() & "([" & U & "])", "CH\1", True
-    Rep "([" & U & "])" & uCUp(), "\1CH", True
+    If Selection.Start <> Selection.End Then
+      Set trgRng = Selection.Range
+    Else
+      Set trgRng = ActiveDocument.Content
+    End If
+    FixAllCapsShCh trgRng
     Rep uSUp(), "Sh", False
     Rep uSLo(), "sh", False
     Rep uCUp(), "Ch", False
@@ -350,7 +379,9 @@ Private Sub DoConvert(ByVal toNewAlpha As Boolean)
     Rep uGLo(), "g" & uOkina(), False
   End If
   Unprotect cnt, orig
+  On Error Resume Next
   QuotesAll
+  On Error GoTo Fail
   Application.ScreenUpdating = True
   On Error Resume Next
   SafeUndoEnd
