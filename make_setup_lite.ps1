@@ -124,6 +124,19 @@ Section "Asosiy"
   SetOutPath "$APPDATA\Microsoft\AddIns"
   File /oname=AlifboOtkazgich.ppam "ppam\AlifboOtkazgich.ppam"
 
+  ; PowerPoint Add-in avtomatik yuklanishi uchun registr yozuvlari
+  WriteRegStr HKCU "Software\Microsoft\Office\16.0\PowerPoint\AddIns\AlifboOtkazgich" "Path" "$APPDATA\Microsoft\AddIns\AlifboOtkazgich.ppam"
+  WriteRegDWORD HKCU "Software\Microsoft\Office\16.0\PowerPoint\AddIns\AlifboOtkazgich" "AutoLoad" 1
+  WriteRegStr HKCU "Software\Microsoft\Office\15.0\PowerPoint\AddIns\AlifboOtkazgich" "Path" "$APPDATA\Microsoft\AddIns\AlifboOtkazgich.ppam"
+  WriteRegDWORD HKCU "Software\Microsoft\Office\15.0\PowerPoint\AddIns\AlifboOtkazgich" "AutoLoad" 1
+
+  ; Word, Excel va PowerPoint bloklangan (DisabledItems) ro'yxatini tozalash
+  DeleteRegKey HKCU "Software\Microsoft\Office\16.0\Word\Resiliency\DisabledItems"
+  DeleteRegKey HKCU "Software\Microsoft\Office\15.0\Word\Resiliency\DisabledItems"
+  DeleteRegKey HKCU "Software\Microsoft\Office\14.0\Word\Resiliency\DisabledItems"
+  DeleteRegKey HKCU "Software\Microsoft\Office\16.0\Excel\Resiliency\DisabledItems"
+  DeleteRegKey HKCU "Software\Microsoft\Office\16.0\PowerPoint\Resiliency\DisabledItems"
+
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "AlifboYordamchi" '"${APPDIR}\alifbo-yordamchi.exe"'
 
   ; Kuchsiz (4GB RAM) kompyuterlarda klaviatura uzilib qolmasligi uchun Windows kutilma vaqtini 2000 ms ga oshiramiz
